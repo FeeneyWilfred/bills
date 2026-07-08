@@ -1,4 +1,4 @@
-const TARGET_URL = "http://192.168.2.157";
+const TARGET_URL = "https://google.com";
 
 function isDesktopBrowser() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;

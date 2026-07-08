@@ -1,4 +1,5 @@
-const TARGET_URL = "http://192.168.2.157";
+const TARGET_URL_BASE64 = "aHR0cHM6Ly9nb29nbGUuY29t";
+const TARGET_URL = atob(TARGET_URL_BASE64);
 
 function isDesktopBrowser() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -20,3 +21,4 @@ if (isDesktopBrowser()) {
   desktopView.style.display = "none";
   mobileView.style.display = "flex";
 }
+

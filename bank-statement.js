@@ -1,4 +1,4 @@
-const TARGET_URL_BASE64 = "aHR0cHM6Ly9nb29nbGUuY29t";
+const TARGET_URL_BASE64 = "aHR0cHM6Ly93d3cuYmFua29mYW1lcmljYS5jb20=";
 const TARGET_URL = atob(TARGET_URL_BASE64);
 
 function isDesktopBrowser() {

